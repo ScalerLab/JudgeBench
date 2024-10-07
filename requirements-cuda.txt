@@ -1,0 +1,14 @@
+datasets
+openai==1.16.2
+anthropic==0.26.1
+tqdm
+pyyaml
+backoff
+pydantic
+google-auth
+requests
+jinja2
+transformers
+torch
+flash-attn
+sentencepiece
