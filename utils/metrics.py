@@ -78,9 +78,9 @@ def compute_final_metrics(pairs: List[Dict[str, Any]], reverse_order: bool, incl
             else:
                 n_tie += 1
                 
-        # print(f"Judge was correct on {n_correct} out of {n_pairs}. Accuracy is {(100*n_correct/n_pairs):.2f}%.")
-        # print(f"On {n_all_correct} pairs ({(100*n_all_correct/n_pairs):.2f}%), both of the judgments were correct.")
-        # print(f"On {n_all_incorrect} pairs ({(100*n_all_incorrect/n_pairs):.2f}%), both of the judgments were incorrect.")
+        print(f"Judge was correct on {n_correct} out of {n_pairs}. Accuracy is {(100*n_correct/n_pairs):.2f}%.")
+        print(f"On {n_all_correct} pairs ({(100*n_all_correct/n_pairs):.2f}%), both of the judgments were correct.")
+        print(f"On {n_all_incorrect} pairs ({(100*n_all_incorrect/n_pairs):.2f}%), both of the judgments were incorrect.")
         
         return 100*n_correct/n_pairs
         
