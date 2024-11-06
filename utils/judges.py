@@ -590,15 +590,13 @@ class CompassJudger(Judge):
             return None, False
         
     async def get_judgment(self, question: str, answer_A: str, answer_B: str) -> Dict[str, Any]:
-        prompt = prompts.render_template(
-            "compass_judger_prompt",
-            question=question,
-            answer_a=answer_A,
-            answer_b=answer_B,
-        )
-
+        system_message = prompts.render_template(
+            "arena_hard_judge_system")
+        user_message = prompts.render_template("arena_hard_judge_prompt",
+                                                    prompt=question, answer_a=answer_A, answer_b=answer_B)
         messages = [
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
         ]
 
         output = await self.api.chat(
@@ -612,7 +610,7 @@ class CompassJudger(Judge):
         return {
             "judgment": {
                 "judge_model": self.model_name,
-                "prompt": prompt,
+                "prompt": messages[1]["content"],
                 "response": output,
             },
             "decision": score.replace(">>", ">").strip() if score else None
