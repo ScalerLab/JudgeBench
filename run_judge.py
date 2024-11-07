@@ -91,7 +91,9 @@ def main(args: argparse.Namespace) -> None:
     # 7. compute final metrics
     print("Computing final metrics ...") 
     pairs = file_operations.read_jsonl(file_path)  # need to load all the history, not just the generated one.
-    metrics.compute_final_metrics(pairs, not args.single_game, include_fn = lambda x: x)
+    for source in ["mmlu-pro", "livebench-reasoning", "livebench-math", "livecodebench", ""]:
+        score = metrics.compute_final_metrics(pairs, not args.single_game, include_fn = lambda x: x["source"].startswith(source))
+        print(f"{source if source else 'Overall'}: {score:.2f}%.")
 
 
 if __name__ == "__main__":

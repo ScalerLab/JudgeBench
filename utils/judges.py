@@ -570,6 +570,51 @@ class SkyworkReward(Judge):
             },
             "decision": judgement
         }
+        
+
+class CompassJudger(Judge):
+    def __init__(self, model_name) -> None:
+        self.model_name = model_name
+        self.api = models.get_chat_api_from_model(model_name)
+        
+    def get_score(cls, judgment: str, pattern: str, pairwise: bool = True) -> Tuple[Union[int, str], Optional[bool]]:
+        matches = pattern.findall(judgment)
+        matches = [m for m in matches if m != ""]
+        if len(set(matches)) == 0:
+            return None, True
+        elif len(set(matches)) == 1:
+            if pairwise:
+                return matches[0].strip("\n"), False
+            return int(matches[0])
+        else:
+            return None, False
+        
+    async def get_judgment(self, question: str, answer_A: str, answer_B: str) -> Dict[str, Any]:
+        system_message = prompts.render_template(
+            "arena_hard_judge_system")
+        user_message = prompts.render_template("arena_hard_judge_prompt",
+                                                    prompt=question, answer_a=answer_A, answer_b=answer_B)
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+
+        output = await self.api.chat(
+            messages=messages,
+            temperature=0.0,
+            max_tokens=2048,
+        )
+        
+        score, _ = self.get_score(output, re.compile("\[\[([AB<>=]+)\]\]"))
+        
+        return {
+            "judgment": {
+                "judge_model": self.model_name,
+                "prompt": messages[1]["content"],
+                "response": output,
+            },
+            "decision": score.replace(">>", ">").strip() if score else None
+        }
 
 
 def get_judge_from_judge_name_and_model(judge_name: str, judge_model: str) -> Judge:
@@ -587,6 +632,8 @@ def get_judge_from_judge_name_and_model(judge_name: str, judge_model: str) -> Ju
         return Prometheus2(judge_model)
     elif judge_name == "skywork_critic":
         return SkyworkCritic(judge_model)
+    elif judge_name == "compass_judger":
+        return CompassJudger(judge_model)
     elif judge_name == "reward_model":
         if judge_model in ["internlm/internlm2-7b-reward", "internlm/internlm2-20b-reward"]:
             return InternLM2Reward(judge_model)
