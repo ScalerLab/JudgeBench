@@ -78,3 +78,15 @@ def compute_final_metrics(pairs: List[Dict[str, Any]], reverse_order: bool, incl
         return 100*n_correct/n_pairs
         
 ##############################################################
+def compute_meta_judge_select(pairs: List[Dict[str, Any]], threshold: int, include_fn=lambda x: x) -> None:
+    
+    pairs = [pair for pair in pairs if include_fn(pair)]
+
+    n_pairs = len(pairs)
+
+    n_correct = sum(
+        pair["judgments"][0]["decision"] == pair["label"] and pair["meta_judgments"][0]["meta_score"] > threshold
+        for pair in pairs
+    )
+    n_incorrect = n_pairs - n_correct
+    return 100*n_correct/n_pairs
